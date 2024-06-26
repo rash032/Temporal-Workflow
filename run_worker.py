@@ -3,7 +3,7 @@ import asyncio
 from temporalio.client import Client
 from temporalio.worker import Worker
 
-from activities import send_email, post_payment
+from activities import send_email, post_payment, account_2_account_credit
 from shared_objects import task_queue_name
 from workflow import SendEmailWorkflow, PaymentWorkflow
 
@@ -15,7 +15,7 @@ async def main():
         client,
         task_queue="payment",
         workflows=[PaymentWorkflow],
-        activities=[post_payment],
+        activities=[post_payment, account_2_account_credit],
     )
     await worker.run()
 

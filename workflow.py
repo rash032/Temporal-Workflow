@@ -4,7 +4,7 @@ from datetime import timedelta
 from temporalio import workflow
 
 with workflow.unsafe.imports_passed_through():
-    from activities import send_email, post_payment
+    from activities import send_email, post_payment, account_2_account_credit
     from shared_objects import EmailDetails, WorkflowOptions, PaymentDetails
 
 
@@ -61,9 +61,15 @@ class PaymentWorkflow:
         self.payment_details.type = data.type
 
         try:
-            return await workflow.execute_activity(
+            payment_confirmation_result = await workflow.execute_activity(
                 post_payment,
                 self.payment_details,
+                start_to_close_timeout=timedelta(seconds=10),
+            )
+            
+            return await workflow.execute_activity(
+                account_2_account_credit,
+                payment_confirmation_result,
                 start_to_close_timeout=timedelta(seconds=10),
             )
 
